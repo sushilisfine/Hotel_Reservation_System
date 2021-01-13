@@ -2,6 +2,8 @@ package com.myhotel.managment.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +25,9 @@ import com.myhotel.managment.service.OfferService;
 public class OfferController {
 
 	@Autowired
-	OfferService offerService;
+	private OfferService offerService;
+
+	Logger logger = LoggerFactory.getLogger(OfferController.class);
 
 	@PostMapping(value = "/hotels/{hotel_code}/offers")
 	public ResponseEntity<OfferResponseDTO> add(@PathVariable("hotel_code") Long hotelCode,

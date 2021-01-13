@@ -2,6 +2,8 @@ package com.myhotel.managment.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +24,9 @@ import com.myhotel.managment.service.RoomService;
 public class RoomController {
 
 	@Autowired
-	RoomService roomService;
+	private RoomService roomService;
+
+	Logger logger = LoggerFactory.getLogger(RoomController.class);
 
 	@PostMapping(value = "/hotels/{hotel_code}/rooms")
 	public ResponseEntity<RoomResponseDTO> add(@PathVariable("hotel_code") Long hotelCode,
@@ -43,5 +47,17 @@ public class RoomController {
 
 		return new ResponseEntity<>(roomService.getAllRooms(hotelCode), HttpStatus.OK);
 	}
+
+	/*
+	 * @GetMapping(value = "/hotels/{hotel_code}/rooms/availability") public
+	 * ResponseEntity<List<HotelResponseDTO>> getAvailableRooms(
+	 * 
+	 * @PathVariable(required = true, name = "hotel_code") String hotelCode,
+	 * 
+	 * @RequestParam(required = false) Map<String, String> qparams) {
+	 * 
+	 * return new ResponseEntity<>(roomService.getAvailableRooms(), HttpStatus.OK);
+	 * }
+	 */
 
 }

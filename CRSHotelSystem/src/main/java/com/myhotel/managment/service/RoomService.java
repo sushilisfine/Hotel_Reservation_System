@@ -13,4 +13,6 @@ public interface RoomService {
 
 	List<RoomResponseDTO> getAllRooms(Long hotelCode);
 
+	List<RoomResponseDTO> getAvailableRooms();
+
 }

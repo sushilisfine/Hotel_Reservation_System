@@ -58,16 +58,6 @@ public class RoomServiceImpl implements RoomService {
 		return updateRoomFromDTO(room, roomRequestDTO);
 	}
 
-	private RoomResponseDTO updateRoomFromDTO(Room room, RoomRequestDTO roomRequestDTO) {
-
-		room.setCharges(roomRequestDTO.getCharges());
-		room.setIsAvailable(roomRequestDTO.getIsAvailable());
-		room.setRoomCategory(roomRequestDTO.getRoomCategory());
-
-		return converteEntityToDTO(room);
-
-	}
-
 	@Override
 	public List<RoomResponseDTO> getAllRooms(Long hotelCode) {
 		Hotel hotel = getHotelFromHotelCode(hotelCode);
@@ -79,6 +69,22 @@ public class RoomServiceImpl implements RoomService {
 
 		});
 		return roomResponseDTO;
+	}
+
+	@Override
+	public List<RoomResponseDTO> getAvailableRooms() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private RoomResponseDTO updateRoomFromDTO(Room room, RoomRequestDTO roomRequestDTO) {
+
+		room.setCharges(roomRequestDTO.getCharges());
+		room.setIsAvailable(roomRequestDTO.getIsAvailable());
+		room.setRoomCategory(roomRequestDTO.getRoomCategory());
+
+		return converteEntityToDTO(room);
+
 	}
 
 	private Room converteDTOToEntity(RoomRequestDTO roomDTO) {

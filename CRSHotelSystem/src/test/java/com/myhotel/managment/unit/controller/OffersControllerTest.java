@@ -1,21 +1,48 @@
 package com.myhotel.managment.unit.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.lenient;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.myhotel.managment.controller.HotelController;
+import com.myhotel.managment.controller.OfferController;
 import com.myhotel.managment.dto.request.OfferRequestDTO;
 import com.myhotel.managment.dto.response.OfferResponseDTO;
+import com.myhotel.managment.service.HotelService;
 import com.myhotel.managment.service.OfferService;
 
 class OffersControllerTest extends AbstractTest {
 
-	@MockBean
-	OfferService offerService;
+	private MockMvc mockMvc;
+
+	@Mock
+	private OfferService offerService;
+
+	@Mock
+	private HotelService hotelService;
+
+	@InjectMocks
+	private OfferController offerController;
+
+	@InjectMocks
+	private HotelController hotelController;
+
+	@BeforeEach
+	public void setup() {
+
+		MockitoAnnotations.openMocks(this);
+		this.mockMvc = MockMvcBuilders.standaloneSetup(offerController, hotelController).build();
+	}
 
 	private OfferRequestDTO getOfferReqDTO() {
 		OfferRequestDTO offerRequestDTO = new OfferRequestDTO();
@@ -37,9 +64,12 @@ class OffersControllerTest extends AbstractTest {
 		OfferRequestDTO offerRequestDTO = getOfferReqDTO();
 		OfferResponseDTO offerResponeDTO = getOfferResDTO();
 
-		mvc.perform(post("api/v1/hotels/1/offers").contentType(MediaType.APPLICATION_JSON)
+		lenient().when(offerService.addOffer(1L, offerRequestDTO)).thenReturn(offerResponeDTO);
+
+		mockMvc.perform(post("/api/v1/hotels/1/offers").contentType(MediaType.APPLICATION_JSON)
 				.content(asJsonString(offerRequestDTO)).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated());
+
 		assertEquals(offerRequestDTO.getOfferCode(), offerResponeDTO.getOfferCode());
 	}
 

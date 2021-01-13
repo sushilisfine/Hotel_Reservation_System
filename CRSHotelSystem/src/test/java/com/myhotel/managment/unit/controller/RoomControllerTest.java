@@ -1,7 +1,8 @@
 package com.myhotel.managment.unit.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doReturn;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.lenient;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -12,17 +13,39 @@ import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.myhotel.managment.controller.HotelController;
+import com.myhotel.managment.controller.RoomController;
 import com.myhotel.managment.dto.request.RoomRequestDTO;
 import com.myhotel.managment.dto.response.RoomResponseDTO;
 import com.myhotel.managment.service.RoomService;
 
 class RoomControllerTest extends AbstractTest {
 
-	@MockBean
+	private MockMvc mockMvc;
+
+	@Mock
 	private RoomService roomService;
+
+	@InjectMocks
+	private RoomController roomController;
+
+	@InjectMocks
+	private HotelController hotelController;
+
+	@BeforeEach
+	public void setup() {
+
+		MockitoAnnotations.openMocks(this);
+		this.mockMvc = MockMvcBuilders.standaloneSetup(roomController, hotelController).build();
+	}
 
 	private RoomRequestDTO roomReqObj() {
 		RoomRequestDTO room = new RoomRequestDTO();
@@ -48,9 +71,9 @@ class RoomControllerTest extends AbstractTest {
 		RoomRequestDTO roomReq = roomReqObj();
 		RoomResponseDTO roomRes = roomResObj();
 
-		doReturn(roomRes).when(roomService.addRoom(1L, roomReq));
+		lenient().when(roomService.addRoom(1L, roomReq)).thenReturn(roomRes);
 
-		mvc.perform(post("/api/v1/hotels/1/rooms").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/api/v1/hotels/1/rooms").contentType(MediaType.APPLICATION_JSON)
 				.content(asJsonString(roomReq)).accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 
 		assertEquals(roomReq.getRoomCode(), roomRes.getRoomCode());
@@ -62,10 +85,10 @@ class RoomControllerTest extends AbstractTest {
 		RoomRequestDTO roomReq = roomReqObj();
 		RoomResponseDTO roomRes = roomResObj();
 
-		doReturn(roomRes).when(roomService.updateRoom(1L, 1, roomReq));
+		lenient().when(roomService.updateRoom(1L, 1, roomReq)).thenReturn(roomRes);
 
-		mvc.perform(put("/api/v1/hotels/1/rooms/1").contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(roomReq)).accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
+		mockMvc.perform(put("/api/v1/hotels/1/rooms/1").contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(roomReq)).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
 		assertEquals(roomReq.getRoomCode(), roomRes.getRoomCode());
 	}
@@ -76,10 +99,11 @@ class RoomControllerTest extends AbstractTest {
 		List<RoomResponseDTO> roomResObj = new ArrayList<>();
 		roomResObj.add(roomResObj());
 
-		doReturn(roomResObj).when(roomService.getAllRooms(1L));
+		lenient().when(roomService.getAllRooms(1L)).thenReturn(roomResObj);
 
-		mvc.perform(get("/api/v1/hotels/1/rooms").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+		mockMvc.perform(get("/api/v1/hotels/1/rooms").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
+		assertNotNull(roomResObj);
 	}
 
 }

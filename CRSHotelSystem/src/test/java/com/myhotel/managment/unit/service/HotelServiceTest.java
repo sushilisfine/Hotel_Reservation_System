@@ -2,17 +2,18 @@ package com.myhotel.managment.unit.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.doReturn;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.lenient;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -20,22 +21,22 @@ import com.myhotel.managment.domain.Hotel;
 import com.myhotel.managment.dto.request.HotelRequestDTO;
 import com.myhotel.managment.dto.response.HotelResponseDTO;
 import com.myhotel.managment.repository.HotelRepository;
-import com.myhotel.managment.service.HotelService;
+import com.myhotel.managment.service.impl.HotelServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
-@SpringBootTest
 @PropertySource("classpath:application-test.properties")
 @ActiveProfiles("test")
 class HotelServiceTest {
 
-	@Autowired
-	private HotelService hotelService;
+	@InjectMocks
+	private HotelServiceImpl hotelService;
 
-	@MockBean
+	@Mock
 	private HotelRepository hotelRepository;
 
 	private Hotel hotelObj() {
 		Hotel hotel = new Hotel();
+		hotel.setId(1L);
 		hotel.setAddress("Nagpur");
 		hotel.setContact(9999999999L);
 		hotel.setHotelCode(1L);
@@ -60,12 +61,12 @@ class HotelServiceTest {
 	}
 
 	@Test
-	void test1AddHotel() {
-		Hotel hotel = hotelObj();
+	void test1AddHotel1() {
+		Hotel hotelObjDb = hotelObj();
 		HotelRequestDTO hotelRequestDTO = hotelRequestDTOObj();
-		HotelResponseDTO hotelResponseDTO = hotelResponseDTOObj();
 
-		doReturn(hotelResponseDTO).when(hotelRepository.save(hotel));
+		lenient().doReturn(null).when(hotelRepository).findByHotelCode(hotelRequestDTO.getHotelCode());
+		lenient().doReturn(hotelObjDb).when(hotelRepository).save(Mockito.any(Hotel.class));
 		HotelResponseDTO createdHotel = hotelService.createHotel(hotelRequestDTO);
 
 		assertEquals(hotelRequestDTO.getAddress(), createdHotel.getAddress());
@@ -75,12 +76,24 @@ class HotelServiceTest {
 	}
 
 	@Test
-	void test2UpdateHotel() {
-		Hotel hotel = hotelObj();
+	void test1AddHotel2() {
+		Hotel hotelObjDb = hotelObj();
 		HotelRequestDTO hotelRequestDTO = hotelRequestDTOObj();
-		HotelResponseDTO hotelResponseDTO = hotelResponseDTOObj();
 
-		doReturn(hotelResponseDTO).when(hotelRepository.save(hotel));
+		lenient().doReturn(hotelObjDb).when(hotelRepository).findByHotelCode(hotelRequestDTO.getHotelCode());
+
+		HotelResponseDTO createdHotel = hotelService.createHotel(hotelRequestDTO);
+
+		assertNull(createdHotel);
+	}
+
+	@Test
+	void test2UpdateHotel() {
+		Hotel hotelObj = hotelObj();
+		HotelRequestDTO hotelRequestDTO = hotelRequestDTOObj();
+
+		lenient().doReturn(hotelObj).when(hotelRepository).findByHotelCode(hotelRequestDTO.getHotelCode());
+		lenient().doReturn(hotelObj).when(hotelRepository).save(Mockito.any(Hotel.class));
 		HotelResponseDTO updatedHotel = hotelService.updateHotel(1L, hotelRequestDTO);
 
 		assertEquals(hotelRequestDTO.getAddress(), updatedHotel.getAddress());
@@ -94,7 +107,9 @@ class HotelServiceTest {
 		List<HotelResponseDTO> hotelResponseDTO = new ArrayList<>();
 		hotelResponseDTO.add(hotelResponseDTOObj());
 
-		doReturn(hotelResponseDTO).when(hotelRepository.findAll());
+		List<Hotel> hotelObj = new ArrayList<>();
+		hotelObj.add(hotelObj());
+		lenient().doReturn(hotelObj).when(hotelRepository).findAll();
 		List<HotelResponseDTO> createdHotel = hotelService.getAllHotels();
 
 		assertNotNull(createdHotel.get(0).getAddress());

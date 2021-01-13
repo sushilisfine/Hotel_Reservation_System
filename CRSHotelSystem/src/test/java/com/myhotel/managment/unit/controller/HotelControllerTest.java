@@ -1,7 +1,7 @@
 package com.myhotel.managment.unit.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -12,17 +12,35 @@ import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.myhotel.managment.controller.HotelController;
 import com.myhotel.managment.dto.request.HotelRequestDTO;
 import com.myhotel.managment.dto.response.HotelResponseDTO;
 import com.myhotel.managment.service.HotelService;
 
 class HotelControllerTest extends AbstractTest {
 
-	@MockBean
+	private MockMvc mockMvc;
+
+	@Mock
 	private HotelService hotelService;
+
+	@InjectMocks
+	private HotelController hotelController;
+
+	@BeforeEach
+	public void setup() {
+
+		MockitoAnnotations.openMocks(this);
+		this.mockMvc = MockMvcBuilders.standaloneSetup(hotelController).build();
+	}
 
 	private HotelRequestDTO hotelRequestObj() {
 		HotelRequestDTO hotel = new HotelRequestDTO();
@@ -46,10 +64,10 @@ class HotelControllerTest extends AbstractTest {
 		HotelRequestDTO hotelReqObj = hotelRequestObj();
 		HotelResponseDTO hotelResObj = hotelResponseObj();
 
-		doReturn(hotelResObj).when(hotelService.createHotel(hotelReqObj));
+		lenient().doReturn(hotelResObj).when(hotelService).createHotel(hotelReqObj);
 
-		mvc.perform(post("/api/v1/hotels").contentType(MediaType.APPLICATION_JSON).content(asJsonString(hotelReqObj))
-				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
+		mockMvc.perform(post("/api/v1/hotels").contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(hotelReqObj)).accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 
 		assertEquals(hotelReqObj.getHotelCode(), hotelResObj.getHotelCode());
 
@@ -61,10 +79,10 @@ class HotelControllerTest extends AbstractTest {
 		HotelRequestDTO hotelReqObj = hotelRequestObj();
 		HotelResponseDTO hotelResObj = hotelResponseObj();
 
-		doReturn(hotelResObj).when(hotelService.updateHotel(1L, hotelReqObj));
+		lenient().doReturn(hotelResObj).when(hotelService).updateHotel(1L, hotelReqObj);
 
-		mvc.perform(put("/api/v1/hotels/1").contentType(MediaType.APPLICATION_JSON).content(asJsonString(hotelReqObj))
-				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+		mockMvc.perform(put("/api/v1/hotels/1").contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(hotelReqObj)).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
 		assertEquals(hotelReqObj.getHotelCode(), hotelResObj.getHotelCode());
 
@@ -76,9 +94,9 @@ class HotelControllerTest extends AbstractTest {
 		List<HotelResponseDTO> hotelResObj = new ArrayList<>();
 		hotelResObj.add(hotelResponseObj());
 
-		doReturn(hotelResObj).when(hotelService.getAllHotels());
+		lenient().doReturn(hotelResObj).when(hotelService).getAllHotels();
 
-		mvc.perform(get("/api/v1/hotels").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+		mockMvc.perform(get("/api/v1/hotels").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
 	}
 

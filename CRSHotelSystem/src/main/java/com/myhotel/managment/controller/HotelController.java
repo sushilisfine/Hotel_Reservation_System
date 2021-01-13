@@ -2,6 +2,8 @@ package com.myhotel.managment.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +24,10 @@ import com.myhotel.managment.service.HotelService;
 public class HotelController {
 
 	@Autowired
-	HotelService hotelService;
+	private HotelService hotelService;
+
+	Logger logger = LoggerFactory.getLogger(HotelController.class);
+
 
 	@PostMapping(value = "/hotels")
 	public ResponseEntity<HotelResponseDTO> add(@RequestBody HotelRequestDTO hotel) {

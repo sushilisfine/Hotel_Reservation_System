@@ -27,7 +27,7 @@ public class HotelServiceImpl implements HotelService {
 	@Override
 	public HotelResponseDTO createHotel(HotelRequestDTO hotelDTO) {
 
-		Hotel hotelDb = hotelRepository.findByHotelCode(hotelDTO.getHotelCode());
+		Hotel hotelDb = getHotelFromHotelCode(hotelDTO.getHotelCode());
 
 		if (hotelDb != null) {
 			logger.error("Hotel with hotel code : {} , already exists.", hotelDTO.getHotelCode());
@@ -44,7 +44,7 @@ public class HotelServiceImpl implements HotelService {
 		Hotel hotelDb = getHotelFromHotelCode(hotelCode);
 
 		updateHotelFromDTO(hotelDb, hotelRequestDTO);
-		hotelRepository.save(hotelDb);
+		hotelDb = hotelRepository.save(hotelDb);
 
 		return converteEntityToDTO(hotelDb);
 	}
