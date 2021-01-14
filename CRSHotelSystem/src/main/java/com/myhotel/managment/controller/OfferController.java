@@ -36,9 +36,9 @@ public class OfferController {
 		return new ResponseEntity<>(offerService.addOffer(hotelCode, offer), HttpStatus.CREATED);
 	}
 
-	@PutMapping(value = "/hotels/{hotel_code}/offers/{{offer_code}}")
+	@PutMapping(value = "/hotels/{hotel_code}/offers/{offer_code}")
 	public ResponseEntity<OfferResponseDTO> update(@PathVariable("hotel_code") Long hotelCode,
-			@PathVariable("offercode") Integer offerCode, @RequestBody OfferRequestDTO offer) {
+			@PathVariable("offer_code") Integer offerCode, @RequestBody OfferRequestDTO offer) {
 
 		return new ResponseEntity<>(offerService.updateOffer(hotelCode, offerCode, offer), HttpStatus.OK);
 	}
@@ -49,9 +49,9 @@ public class OfferController {
 		return new ResponseEntity<>(offerService.getAllOffers(hotelCode), HttpStatus.OK);
 	}
 
-	@DeleteMapping(value = "/hotels/{hotel_code}/offers/{{offer_code}}")
+	@DeleteMapping(value = "/hotels/{hotel_code}/offers/{offer_code}")
 	public ResponseEntity<OfferResponseDTO> delete(@PathVariable("hotel_code") Long hotelCode,
-			@PathVariable("offercode") Integer offerCode) {
+			@PathVariable("offer_code") Integer offerCode) {
 
 		return new ResponseEntity<>(offerService.deleteOffer(hotelCode), HttpStatus.OK);
 	}

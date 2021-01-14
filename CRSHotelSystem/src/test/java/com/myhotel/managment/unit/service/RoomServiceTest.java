@@ -5,6 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,16 +44,30 @@ class RoomServiceTest {
 		RoomRequestDTO room = new RoomRequestDTO();
 		room.setRoomCode(1);
 		room.setRoomCategory("Single");
-		room.setIsAvailable(true);
+
+		List<LocalDate> bookingDates = new ArrayList<>();
+
+		bookingDates.add(LocalDate.of(2021, 2, 12));
+		bookingDates.add(LocalDate.of(2021, 2, 13));
+		bookingDates.add(LocalDate.of(2021, 2, 14));
+
+		room.setBookedDates(bookingDates);
 		room.setCharges(200.00);
 		return room;
 	}
 
 	private Room roomObj() {
 		Room room = new Room();
+		room.setId(1);
 		room.setRoomCode(1);
 		room.setRoomCategory("Single");
-		room.setIsAvailable(true);
+		List<LocalDate> bookingDates = new ArrayList<>();
+
+		bookingDates.add(LocalDate.of(2021, 2, 12));
+		bookingDates.add(LocalDate.of(2021, 2, 13));
+		bookingDates.add(LocalDate.of(2021, 2, 14));
+
+		room.setBookedDates(bookingDates);
 		room.setCharges(200.00);
 		return room;
 	}
@@ -73,7 +91,7 @@ class RoomServiceTest {
 		RoomResponseDTO createdRoom = roomService.addRoom(1L, roomRequestDTO);
 
 		assertEquals(createdRoom.getCharges(), roomRequestDTO.getCharges());
-		assertEquals(createdRoom.getIsAvailable(), roomRequestDTO.getIsAvailable());
+		assertEquals(createdRoom.getBookedDates(), roomRequestDTO.getBookedDates());
 		assertEquals(createdRoom.getRoomCategory(), roomRequestDTO.getRoomCategory());
 		assertEquals(createdRoom.getRoomCode(), roomRequestDTO.getRoomCode());
 	}
@@ -102,7 +120,7 @@ class RoomServiceTest {
 		RoomResponseDTO updatedRoom = roomService.updateRoom(1L, 1, roomRequestDTO);
 
 		assertEquals(updatedRoom.getCharges(), roomRequestDTO.getCharges());
-		assertEquals(updatedRoom.getIsAvailable(), roomRequestDTO.getIsAvailable());
+		assertEquals(updatedRoom.getBookedDates(), roomRequestDTO.getBookedDates());
 		assertEquals(updatedRoom.getRoomCategory(), roomRequestDTO.getRoomCategory());
 		assertEquals(updatedRoom.getRoomCode(), roomRequestDTO.getRoomCode());
 	}

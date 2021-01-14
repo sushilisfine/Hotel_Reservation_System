@@ -1,5 +1,10 @@
 package com.myhotel.managment.dto.response;
 
+import java.time.LocalDate;
+import java.util.List;
+
+import javax.persistence.ElementCollection;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,6 +26,7 @@ public class RoomResponseDTO {
 
 	private String roomCategory;
 
-	private Boolean isAvailable;
+	@ElementCollection
+	private List<LocalDate> bookedDates;
 
 }

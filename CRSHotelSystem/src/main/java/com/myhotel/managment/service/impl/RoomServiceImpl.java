@@ -80,7 +80,7 @@ public class RoomServiceImpl implements RoomService {
 	private RoomResponseDTO updateRoomFromDTO(Room room, RoomRequestDTO roomRequestDTO) {
 
 		room.setCharges(roomRequestDTO.getCharges());
-		room.setIsAvailable(roomRequestDTO.getIsAvailable());
+		room.setBookedDates(roomRequestDTO.getBookedDates());
 		room.setRoomCategory(roomRequestDTO.getRoomCategory());
 
 		return converteEntityToDTO(room);
@@ -89,15 +89,15 @@ public class RoomServiceImpl implements RoomService {
 
 	private Room converteDTOToEntity(RoomRequestDTO roomDTO) {
 
-		return Room.builder().charges(roomDTO.getCharges()).isAvailable(roomDTO.getIsAvailable())
-				.roomCategory(roomDTO.getRoomCategory()).roomCode(roomDTO.getRoomCode()).build();
+		return Room.builder().charges(roomDTO.getCharges()).roomCategory(roomDTO.getRoomCategory())
+				.roomCode(roomDTO.getRoomCode()).bookedDates(roomDTO.getBookedDates()).build();
 
 	}
 
 	private RoomResponseDTO converteEntityToDTO(Room room) {
 
-		return RoomResponseDTO.builder().charges(room.getCharges()).isAvailable(room.getIsAvailable())
-				.roomCategory(room.getRoomCategory()).id(room.getId()).roomCode(room.getRoomCode()).build();
+		return RoomResponseDTO.builder().charges(room.getCharges()).roomCategory(room.getRoomCategory())
+				.id(room.getId()).roomCode(room.getRoomCode()).bookedDates(room.getBookedDates()).build();
 
 	}
 

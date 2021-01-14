@@ -1,6 +1,9 @@
 package com.myhotel.managment.domain;
 
-import javax.persistence.Column;
+import java.time.LocalDate;
+import java.util.List;
+
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -35,8 +38,8 @@ public class Room {
 
 	private String roomCategory;
 
-	@Column(columnDefinition = "boolean default true")
-	private Boolean isAvailable;
+	@ElementCollection
+	private List<LocalDate> bookedDates;
 
 	@ManyToOne
 	@JoinColumn(name = "hotel_id", referencedColumnName = "id")

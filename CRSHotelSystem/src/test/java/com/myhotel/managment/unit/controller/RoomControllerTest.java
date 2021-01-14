@@ -51,7 +51,6 @@ class RoomControllerTest extends AbstractTest {
 		RoomRequestDTO room = new RoomRequestDTO();
 		room.setRoomCode(1);
 		room.setRoomCategory("Single");
-		room.setIsAvailable(true);
 		room.setCharges(200.00);
 		return room;
 	}
@@ -59,8 +58,8 @@ class RoomControllerTest extends AbstractTest {
 	private RoomResponseDTO roomResObj() {
 		RoomResponseDTO room = new RoomResponseDTO();
 		room.setRoomCode(1);
+		room.setId(1);
 		room.setRoomCategory("Single");
-		room.setIsAvailable(true);
 		room.setCharges(200.00);
 		return room;
 	}

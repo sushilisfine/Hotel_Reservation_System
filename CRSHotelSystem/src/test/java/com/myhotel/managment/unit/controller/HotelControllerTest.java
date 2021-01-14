@@ -52,6 +52,7 @@ class HotelControllerTest extends AbstractTest {
 
 	private HotelResponseDTO hotelResponseObj() {
 		HotelResponseDTO hotel = new HotelResponseDTO();
+		hotel.setId(1L);
 		hotel.setAddress("Nagpur");
 		hotel.setContact(9999999999L);
 		hotel.setHotelCode(1L);
