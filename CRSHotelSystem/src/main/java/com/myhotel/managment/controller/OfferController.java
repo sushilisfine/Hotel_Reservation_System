@@ -2,10 +2,6 @@ package com.myhotel.managment.controller;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,45 +10,25 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import com.myhotel.managment.dto.request.OfferRequestDTO;
-import com.myhotel.managment.dto.response.OfferResponseDTO;
-import com.myhotel.managment.service.OfferService;
+import com.myhotel.managment.dto.OfferDTO;
 
-@RestController
-@RequestMapping("/api/v1")
-public class OfferController {
+@RequestMapping("/api/v1/hotels/")
+public interface OfferController {
 
-	@Autowired
-	private OfferService offerService;
+	@PostMapping("{hotel_id}/offers")
+	public ResponseEntity<OfferDTO> add(@PathVariable("hotel_id") Long hotelId, @RequestBody OfferDTO offer);
 
-	Logger logger = LoggerFactory.getLogger(OfferController.class);
+	@PutMapping("{hotel_id}/offers/{offer_id}")
+	public ResponseEntity<OfferDTO> update(@PathVariable("hotel_id") Long hotelId,
+			@PathVariable("offer_id") Long offerId, @RequestBody OfferDTO offer);
 
-	@PostMapping(value = "/hotels/{hotel_code}/offers")
-	public ResponseEntity<OfferResponseDTO> add(@PathVariable("hotel_code") Long hotelCode,
-			@RequestBody OfferRequestDTO offer) {
+	@GetMapping("{hotel_id}/offers")
+	public ResponseEntity<List<OfferDTO>> getAll(@PathVariable("hotel_id") Long hotelId,
+			@RequestParam("category_id") Long categoryId);
 
-		return new ResponseEntity<>(offerService.addOffer(hotelCode, offer), HttpStatus.CREATED);
-	}
-
-	@PutMapping(value = "/hotels/{hotel_code}/offers/{offer_code}")
-	public ResponseEntity<OfferResponseDTO> update(@PathVariable("hotel_code") Long hotelCode,
-			@PathVariable("offer_code") Integer offerCode, @RequestBody OfferRequestDTO offer) {
-
-		return new ResponseEntity<>(offerService.updateOffer(hotelCode, offerCode, offer), HttpStatus.OK);
-	}
-
-	@GetMapping(value = "/hotels/{hotel_code}/offers")
-	public ResponseEntity<List<OfferResponseDTO>> getAll(@PathVariable("hotel_code") Long hotelCode) {
-
-		return new ResponseEntity<>(offerService.getAllOffers(hotelCode), HttpStatus.OK);
-	}
-
-	@DeleteMapping(value = "/hotels/{hotel_code}/offers/{offer_code}")
-	public ResponseEntity<OfferResponseDTO> delete(@PathVariable("hotel_code") Long hotelCode,
-			@PathVariable("offer_code") Integer offerCode) {
-
-		return new ResponseEntity<>(offerService.deleteOffer(hotelCode), HttpStatus.OK);
-	}
+	@DeleteMapping("{hotel_id}/offers/{offer_id}")
+	public ResponseEntity<Long> delete(@PathVariable("hotel_id") Long hotelId, @PathVariable("offer_id") Long offerId,
+			@RequestParam("category_id") Long categoryId);
 }

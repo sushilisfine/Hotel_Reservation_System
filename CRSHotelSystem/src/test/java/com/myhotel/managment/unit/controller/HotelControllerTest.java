@@ -1,5 +1,6 @@
 package com.myhotel.managment.unit.controller;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.lenient;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -18,11 +19,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.myhotel.managment.controller.HotelController;
-import com.myhotel.managment.dto.request.HotelRequestDTO;
-import com.myhotel.managment.dto.response.HotelResponseDTO;
+import com.myhotel.managment.controller.impl.HotelControllerImpl;
+import com.myhotel.managment.domain.Hotel;
+import com.myhotel.managment.dto.HotelDTO;
 import com.myhotel.managment.service.HotelService;
 
 class HotelControllerTest extends AbstractTest {
@@ -33,7 +35,7 @@ class HotelControllerTest extends AbstractTest {
 	private HotelService hotelService;
 
 	@InjectMocks
-	private HotelController hotelController;
+	private HotelControllerImpl hotelController;
 
 	@BeforeEach
 	public void setup() {
@@ -42,63 +44,63 @@ class HotelControllerTest extends AbstractTest {
 		this.mockMvc = MockMvcBuilders.standaloneSetup(hotelController).build();
 	}
 
-	private HotelRequestDTO hotelRequestObj() {
-		HotelRequestDTO hotel = new HotelRequestDTO();
-		hotel.setAddress("Nagpur");
-		hotel.setContact(9999999999L);
-		hotel.setHotelCode(1L);
-		return hotel;
-	}
-
-	private HotelResponseDTO hotelResponseObj() {
-		HotelResponseDTO hotel = new HotelResponseDTO();
+	private HotelDTO hotelDtoObj() {
+		HotelDTO hotel = new HotelDTO();
 		hotel.setId(1L);
 		hotel.setAddress("Nagpur");
 		hotel.setContact(9999999999L);
-		hotel.setHotelCode(1L);
+		return hotel;
+	}
+
+	private Hotel hotelObj() {
+		Hotel hotel = new Hotel();
+		hotel.setId(1L);
+		hotel.setAddress("Nagpur");
+		hotel.setContact(9999999999L);
 		return hotel;
 	}
 
 	@Test
 	void test1SaveHotel() throws Exception {
 
-		HotelRequestDTO hotelReqObj = hotelRequestObj();
-		HotelResponseDTO hotelResObj = hotelResponseObj();
+		HotelDTO hotelDtoObj = hotelDtoObj();
 
-		lenient().doReturn(hotelResObj).when(hotelService).createHotel(hotelReqObj);
+		lenient().doReturn(hotelDtoObj).when(hotelService).create(hotelDtoObj);
 
 		mockMvc.perform(post("/api/v1/hotels").contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(hotelReqObj)).accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
+				.content(asJsonString(hotelDtoObj)).accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 
-		assertEquals(hotelReqObj.getHotelCode(), hotelResObj.getHotelCode());
+		assertEquals(hotelDtoObj.getContact(), hotelDtoObj.getContact());
 
 	}
 
 	@Test
 	void test1UpdateHotel() throws Exception {
 
-		HotelRequestDTO hotelReqObj = hotelRequestObj();
-		HotelResponseDTO hotelResObj = hotelResponseObj();
+		HotelDTO hotelDtoObj = hotelDtoObj();
+		Hotel hotelObj = hotelObj();
 
-		lenient().doReturn(hotelResObj).when(hotelService).updateHotel(1L, hotelReqObj);
+		lenient().doReturn(hotelObj).when(hotelService).get(1L);
+		lenient().doReturn(hotelDtoObj).when(hotelService).update(hotelDtoObj);
 
-		mockMvc.perform(put("/api/v1/hotels/1").contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(hotelReqObj)).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+		mockMvc.perform(put("/api/v1/hotels/{hotel_id}", 1).contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(hotelDtoObj)).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
-		assertEquals(hotelReqObj.getHotelCode(), hotelResObj.getHotelCode());
+		assertEquals(hotelDtoObj.getContact(), hotelObj.getContact());
 
 	}
 
 	@Test
 	void test1GetAllHotels() throws Exception {
 
-		List<HotelResponseDTO> hotelResObj = new ArrayList<>();
-		hotelResObj.add(hotelResponseObj());
+		List<HotelDTO> hotelDtoObj = new ArrayList<>();
+		hotelDtoObj.add(hotelDtoObj());
 
-		lenient().doReturn(hotelResObj).when(hotelService).getAllHotels();
+		lenient().doReturn(hotelDtoObj).when(hotelService).getAll();
 
-		mockMvc.perform(get("/api/v1/hotels").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
-
+		mockMvc.perform(get("/api/v1/hotels").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(MockMvcResultMatchers.jsonPath("$.[0].id", is(1)))
+				.andExpect(MockMvcResultMatchers.jsonPath("$.[0].address", is("Nagpur")));
 	}
 
 }

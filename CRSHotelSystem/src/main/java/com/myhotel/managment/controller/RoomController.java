@@ -1,11 +1,9 @@
 package com.myhotel.managment.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,51 +11,26 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import com.myhotel.managment.dto.request.RoomRequestDTO;
-import com.myhotel.managment.dto.response.RoomResponseDTO;
-import com.myhotel.managment.service.RoomService;
+import com.myhotel.managment.dto.RoomDTO;
 
-@RestController
-@RequestMapping("/api/v1")
-public class RoomController {
+@RequestMapping("/api/v1/hotels/")
+public interface RoomController {
 
-	@Autowired
-	private RoomService roomService;
+	@PostMapping("{hotel_id}/rooms")
+	public ResponseEntity<RoomDTO> add(@PathVariable("hotel_id") Long hotelId, @RequestBody RoomDTO room);
 
-	Logger logger = LoggerFactory.getLogger(RoomController.class);
+	@PutMapping("{hotel_id}/rooms/{room_id}")
+	public ResponseEntity<RoomDTO> update(@PathVariable("hotel_id") Long hotelId, @PathVariable("room_id") Long roomId,
+			@RequestBody RoomDTO roomDTO);
 
-	@PostMapping(value = "/hotels/{hotel_code}/rooms")
-	public ResponseEntity<RoomResponseDTO> add(@PathVariable("hotel_code") Long hotelCode,
-			@RequestBody RoomRequestDTO hotel) {
+	@GetMapping("{hotel_id}/rooms")
+	public ResponseEntity<List<RoomDTO>> getAll(@PathVariable("hotel_id") Long hotelId);
 
-		return new ResponseEntity<>(roomService.addRoom(hotelCode, hotel), HttpStatus.CREATED);
-	}
-
-	@PutMapping(value = "/hotels/{hotel_code}/rooms/{room_code}")
-	public ResponseEntity<RoomResponseDTO> update(@PathVariable("hotel_code") Long hotelCode,
-			@PathVariable("room_code") Integer roomCode, @RequestBody RoomRequestDTO roomRequestDTO) {
-
-		return new ResponseEntity<>(roomService.updateRoom(hotelCode, roomCode, roomRequestDTO), HttpStatus.OK);
-	}
-
-	@GetMapping(value = "/hotels/{hotel_code}/rooms")
-	public ResponseEntity<List<RoomResponseDTO>> getAll(@PathVariable("hotel_code") Long hotelCode) {
-
-		return new ResponseEntity<>(roomService.getAllRooms(hotelCode), HttpStatus.OK);
-	}
-
-	/*
-	 * @GetMapping(value = "/hotels/{hotel_code}/rooms/availability") public
-	 * ResponseEntity<List<HotelResponseDTO>> getAvailableRooms(
-	 * 
-	 * @PathVariable(required = true, name = "hotel_code") String hotelCode,
-	 * 
-	 * @RequestParam(required = false) Map<String, String> qparams) {
-	 * 
-	 * return new ResponseEntity<>(roomService.getAvailableRooms(), HttpStatus.OK);
-	 * }
-	 */
+	@GetMapping("{hotel_id}/rooms/availability")
+	public ResponseEntity<List<RoomDTO>> getAvailable(@PathVariable(required = true, name = "hotel_id") Long hotelId,
+			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate from,
+			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate to, @RequestParam Long categoryId);
 
 }

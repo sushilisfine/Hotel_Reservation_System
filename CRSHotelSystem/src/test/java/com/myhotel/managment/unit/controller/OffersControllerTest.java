@@ -1,16 +1,11 @@
 package com.myhotel.managment.unit.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.lenient;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,11 +16,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.myhotel.managment.controller.HotelController;
-import com.myhotel.managment.controller.OfferController;
-import com.myhotel.managment.dto.request.OfferRequestDTO;
-import com.myhotel.managment.dto.response.OfferResponseDTO;
-import com.myhotel.managment.service.HotelService;
+import com.myhotel.managment.controller.impl.HotelControllerImpl;
+import com.myhotel.managment.controller.impl.OfferControllerImpl;
+import com.myhotel.managment.domain.Category;
+import com.myhotel.managment.domain.Hotel;
+import com.myhotel.managment.domain.Offer;
+import com.myhotel.managment.dto.OfferDTO;
 import com.myhotel.managment.service.OfferService;
 
 class OffersControllerTest extends AbstractTest {
@@ -35,14 +31,11 @@ class OffersControllerTest extends AbstractTest {
 	@Mock
 	private OfferService offerService;
 
-	@Mock
-	private HotelService hotelService;
+	@InjectMocks
+	private OfferControllerImpl offerController;
 
 	@InjectMocks
-	private OfferController offerController;
-
-	@InjectMocks
-	private HotelController hotelController;
+	private HotelControllerImpl hotelController;
 
 	@BeforeEach
 	public void setup() {
@@ -51,72 +44,80 @@ class OffersControllerTest extends AbstractTest {
 		this.mockMvc = MockMvcBuilders.standaloneSetup(offerController, hotelController).build();
 	}
 
-	private OfferRequestDTO getOfferReqObj() {
-		OfferRequestDTO offerRequestDTO = new OfferRequestDTO();
-		offerRequestDTO.setOfferCode(null);
-		offerRequestDTO.setValue(1000.00);
-		return offerRequestDTO;
+	private OfferDTO getOfferDtoObj() {
+		OfferDTO offerDTO = new OfferDTO();
+		offerDTO.setCategoryId(1L);
+		offerDTO.setHotelId(1L);
+		offerDTO.setValue(1000.00);
+		return offerDTO;
 	}
 
-	private OfferResponseDTO getOfferResObj() {
-		OfferResponseDTO offerResponseDTO = new OfferResponseDTO();
-		offerResponseDTO.setId(1);
-		offerResponseDTO.setOfferCode(null);
-		offerResponseDTO.setValue(1000.00);
-		return offerResponseDTO;
+	private Offer getOfferObj() {
+		Offer offer = new Offer();
+		offer.setId(1L);
+		offer.setValue(1000.00);
+		return offer;
+	}
+
+	private Hotel getHotelObj() {
+		Hotel hotel = new Hotel();
+		hotel.setId(1L);
+		hotel.setAddress("Nagpur");
+		hotel.setContact(9999999999L);
+		return hotel;
+	}
+
+	private Category getCategoryObj() {
+		Category category = new Category();
+		category.setId(1L);
+		category.setCharges(1000.00);
+		category.setDescription("Single");
+		return category;
 	}
 
 	@Test
 	void test1CreateOffer() throws Exception {
-		OfferRequestDTO offerRequestDTO = getOfferReqObj();
-		OfferResponseDTO offerResponeDTO = getOfferResObj();
+		OfferDTO offerDTO = getOfferDtoObj();
 
-		lenient().when(offerService.addOffer(1L, offerRequestDTO)).thenReturn(offerResponeDTO);
+		lenient().when(offerService.add(offerDTO)).thenReturn(offerDTO);
 
-		mockMvc.perform(post("/api/v1/hotels/1/offers").contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(offerRequestDTO)).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isCreated());
+		lenient().when(offerService.getHotel(1L)).thenReturn(getHotelObj());
+		lenient().when(offerService.getCategory(1L)).thenReturn(getCategoryObj());
 
-		assertEquals(offerRequestDTO.getOfferCode(), offerResponeDTO.getOfferCode());
-	}
+		mockMvc.perform(post("/api/v1/hotels/{hotel_id}/offers", 1).contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(offerDTO)).accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 
-	@Test
-	void test2GetAllOffers() throws Exception {
-
-		List<OfferResponseDTO> offerResponeObj = new ArrayList<>();
-		offerResponeObj.add(getOfferResObj());
-
-		lenient().when(offerService.getAllOffers(1L)).thenReturn(offerResponeObj);
-
-		mockMvc.perform(get("/api/v1/hotels/1/offers").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
-
-		assertNotNull(offerResponeObj);
+		assertEquals(offerDTO.getValue(), offerDTO.getValue());
 	}
 
 	@Test
 	void test3UpdateOffer() throws Exception {
 
-		OfferRequestDTO offerReq = getOfferReqObj();
-		OfferResponseDTO offerRes = getOfferResObj();
+		OfferDTO offerDTO = getOfferDtoObj();
 
-		lenient().when(offerService.updateOffer(1L, 1, offerReq)).thenReturn(offerRes);
+		lenient().when(offerService.getHotel(1L)).thenReturn(getHotelObj());
+		lenient().when(offerService.getCategory(1L)).thenReturn(getCategoryObj());
+		lenient().when(offerService.getOffer(1L)).thenReturn(getOfferObj());
 
-		mockMvc.perform(put("/api/v1/hotels/1/offers/1").contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(offerReq)).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+		lenient().when(offerService.update(offerDTO)).thenReturn(offerDTO);
 
-		assertEquals(offerReq.getOfferCode(), offerRes.getOfferCode());
+		mockMvc.perform(put("/api/v1/hotels/{hotel_id}/offers/{offer_id}", 1, 1).contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(offerDTO)).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+
+		assertEquals(offerDTO.getValue(), offerDTO.getValue());
 	}
 
 	@Test
 	void test4DeleteOffer() throws Exception {
 
-		OfferResponseDTO offerRes = getOfferResObj();
+		lenient().when(offerService.getHotel(1L)).thenReturn(getHotelObj());
+		lenient().when(offerService.getCategory(1L)).thenReturn(getCategoryObj());
+		lenient().when(offerService.getOffer(1L)).thenReturn(getOfferObj());
 
-		lenient().when(offerService.deleteOffer(1L)).thenReturn(offerRes);
+		lenient().when(offerService.delete(1L)).thenReturn(1L);
 
-		mockMvc.perform(delete("/api/v1/hotels/1/offers/1").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+		mockMvc.perform(delete("/api/v1/hotels/{hotel_id}/offers/{offer_id}", 1, 1).param("category_id", "1")
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
-		assertNotNull(offerRes);
 	}
 }

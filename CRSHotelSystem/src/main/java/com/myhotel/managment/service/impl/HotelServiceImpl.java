@@ -2,14 +2,12 @@ package com.myhotel.managment.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.myhotel.managment.domain.Hotel;
-import com.myhotel.managment.dto.request.HotelRequestDTO;
-import com.myhotel.managment.dto.response.HotelResponseDTO;
+import com.myhotel.managment.dto.HotelDTO;
 import com.myhotel.managment.repository.HotelRepository;
 import com.myhotel.managment.service.HotelService;
 
@@ -18,76 +16,55 @@ public class HotelServiceImpl implements HotelService {
 
 	private HotelRepository hotelRepository;
 
-	Logger logger = LoggerFactory.getLogger(HotelServiceImpl.class);
-
 	public HotelServiceImpl(HotelRepository hotelRepository) {
 		this.hotelRepository = hotelRepository;
 	}
 
 	@Override
-	public HotelResponseDTO createHotel(HotelRequestDTO hotelDTO) {
-
-		Hotel hotelDb = getHotelFromHotelCode(hotelDTO.getHotelCode());
-
-		if (hotelDb != null) {
-			logger.error("Hotel with hotel code : {} , already exists.", hotelDTO.getHotelCode());
-			return null;
-		}
+	public HotelDTO create(HotelDTO hotelDTO) {
 		Hotel hotel = converteDTOToEntity(hotelDTO);
-
 		return converteEntityToDTO(hotelRepository.save(hotel));
-
 	}
 
 	@Override
-	public HotelResponseDTO updateHotel(Long hotelCode, HotelRequestDTO hotelRequestDTO) {
-		Hotel hotelDb = getHotelFromHotelCode(hotelCode);
+	public HotelDTO update(HotelDTO hotelDTO) {
 
-		updateHotelFromDTO(hotelDb, hotelRequestDTO);
-		hotelDb = hotelRepository.save(hotelDb);
-
-		return converteEntityToDTO(hotelDb);
-	}
-
-	private Hotel updateHotelFromDTO(Hotel hotel, HotelRequestDTO hotelRequestDTO) {
-
-		hotel.setAddress(hotelRequestDTO.getAddress());
-		hotel.setContact(hotelRequestDTO.getContact());
-		hotel.setHotelCode(hotelRequestDTO.getHotelCode());
-
-		return hotel;
-
+		Hotel hotel = converteDTOToEntity(hotelDTO);
+		hotelRepository.save(hotel);
+		return converteEntityToDTO(hotel);
 	}
 
 	@Override
-	public List<HotelResponseDTO> getAllHotels() {
+	public List<HotelDTO> getAll() {
 
 		List<Hotel> hotels = hotelRepository.findAll();
-		List<HotelResponseDTO> hotelResponseDTO = new ArrayList<>();
-
-		hotels.forEach(hotel -> {
-			hotelResponseDTO.add(converteEntityToDTO(hotel));
-
-		});
-		return hotelResponseDTO;
+		return converteEntityToDTO(hotels);
 	}
 
-	private Hotel converteDTOToEntity(HotelRequestDTO hotelDTO) {
+	private Hotel converteDTOToEntity(HotelDTO hotelDTO) {
 
-		return Hotel.builder().address(hotelDTO.getAddress()).contact(hotelDTO.getContact())
-				.hotelCode(hotelDTO.getHotelCode()).build();
+		return Hotel.builder().id(hotelDTO.getId()).address(hotelDTO.getAddress()).contact(hotelDTO.getContact())
+				.build();
 
 	}
 
-	private HotelResponseDTO converteEntityToDTO(Hotel hotel) {
+	private HotelDTO converteEntityToDTO(Hotel hotel) {
 
-		return HotelResponseDTO.builder().address(hotel.getAddress()).contact(hotel.getContact())
-				.hotelCode(hotel.getHotelCode()).id(hotel.getId()).build();
+		return HotelDTO.builder().address(hotel.getAddress()).contact(hotel.getContact()).id(hotel.getId()).build();
 
 	}
 
-	private Hotel getHotelFromHotelCode(Long hotelCode) {
-		return hotelRepository.findByHotelCode(hotelCode);
+	private List<HotelDTO> converteEntityToDTO(List<Hotel> hotels) {
+
+		List<HotelDTO> hotelDTO = new ArrayList<>();
+		hotels.forEach(hotel -> hotelDTO.add(converteEntityToDTO(hotel)));
+		return hotelDTO;
+	}
+
+	@Override
+	public Hotel get(Long hotelId) {
+		Optional<Hotel> hotel = hotelRepository.findById(hotelId);
+		return hotel.orElse(new Hotel());
 	}
 
 }

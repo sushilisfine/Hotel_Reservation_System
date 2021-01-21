@@ -2,15 +2,17 @@ package com.myhotel.managment.service;
 
 import java.util.List;
 
-import com.myhotel.managment.dto.request.HotelRequestDTO;
-import com.myhotel.managment.dto.response.HotelResponseDTO;
+import com.myhotel.managment.domain.Hotel;
+import com.myhotel.managment.dto.HotelDTO;
 
 public interface HotelService {
 
-	HotelResponseDTO createHotel(HotelRequestDTO hotelDTO);
+	HotelDTO create(HotelDTO hotelDTO);
 
-	List<HotelResponseDTO> getAllHotels();
+	List<HotelDTO> getAll();
 
-	HotelResponseDTO updateHotel(Long hotelCode, HotelRequestDTO hotelRequestDTO);
+	HotelDTO update(HotelDTO hotelDTO);
+
+	Hotel get(Long hotelId);
 
 }

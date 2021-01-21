@@ -2,11 +2,11 @@ package com.myhotel.managment.unit.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.lenient;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,8 +18,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.myhotel.managment.domain.Hotel;
-import com.myhotel.managment.dto.request.HotelRequestDTO;
-import com.myhotel.managment.dto.response.HotelResponseDTO;
+import com.myhotel.managment.dto.HotelDTO;
 import com.myhotel.managment.repository.HotelRepository;
 import com.myhotel.managment.service.impl.HotelServiceImpl;
 
@@ -39,82 +38,67 @@ class HotelServiceTest {
 		hotel.setId(1L);
 		hotel.setAddress("Nagpur");
 		hotel.setContact(9999999999L);
-		hotel.setHotelCode(1L);
 		return hotel;
 	}
 
-	private HotelRequestDTO hotelRequestDTOObj() {
-		HotelRequestDTO hotelRequestDTO = new HotelRequestDTO();
-		hotelRequestDTO.setAddress("Nagpur");
-		hotelRequestDTO.setContact(9999999999L);
-		hotelRequestDTO.setHotelCode(1L);
-		return hotelRequestDTO;
-	}
-
-	private HotelResponseDTO hotelResponseDTOObj() {
-		HotelResponseDTO hotelResponseDTO = new HotelResponseDTO();
-		hotelResponseDTO.setId(1L);
-		hotelResponseDTO.setAddress("Nagpur");
-		hotelResponseDTO.setContact(9999999999L);
-		hotelResponseDTO.setHotelCode(1L);
-		return hotelResponseDTO;
+	private HotelDTO hotelDTOObj() {
+		HotelDTO hotelDTO = new HotelDTO();
+		hotelDTO.setAddress("Nagpur");
+		hotelDTO.setContact(9999999999L);
+		return hotelDTO;
 	}
 
 	@Test
 	void test1AddHotel1() {
 		Hotel hotelObjDb = hotelObj();
-		HotelRequestDTO hotelRequestDTO = hotelRequestDTOObj();
+		HotelDTO hotelDTO = hotelDTOObj();
 
-		lenient().doReturn(null).when(hotelRepository).findByHotelCode(hotelRequestDTO.getHotelCode());
 		lenient().doReturn(hotelObjDb).when(hotelRepository).save(Mockito.any(Hotel.class));
-		HotelResponseDTO createdHotel = hotelService.createHotel(hotelRequestDTO);
+		HotelDTO createdHotel = hotelService.create(hotelDTO);
 
-		assertEquals(hotelRequestDTO.getAddress(), createdHotel.getAddress());
-		assertEquals(hotelRequestDTO.getContact(), createdHotel.getContact());
-		assertEquals(hotelRequestDTO.getHotelCode(), createdHotel.getHotelCode());
+		assertEquals(hotelDTO.getAddress(), createdHotel.getAddress());
+		assertEquals(hotelDTO.getContact(), createdHotel.getContact());
 		assertNotNull(createdHotel.getId());
 	}
 
 	@Test
 	void test1AddHotel2() {
-		Hotel hotelObjDb = hotelObj();
-		HotelRequestDTO hotelRequestDTO = hotelRequestDTOObj();
+		Hotel hotelObj = hotelObj();
+		HotelDTO hotelDTO = hotelDTOObj();
 
-		lenient().doReturn(hotelObjDb).when(hotelRepository).findByHotelCode(hotelRequestDTO.getHotelCode());
+		lenient().doReturn(hotelObj).when(hotelRepository).save(Mockito.any(Hotel.class));
+		HotelDTO createdHotel = hotelService.create(hotelDTO);
 
-		HotelResponseDTO createdHotel = hotelService.createHotel(hotelRequestDTO);
-
-		assertNull(createdHotel);
+		assertNotNull(createdHotel);
 	}
 
 	@Test
 	void test2UpdateHotel() {
-		Hotel hotelObj = hotelObj();
-		HotelRequestDTO hotelRequestDTO = hotelRequestDTOObj();
+		Hotel hotel = hotelObj();
+		HotelDTO hotelDTO = hotelDTOObj();
+		hotelDTO.setId(1L);
 
-		lenient().doReturn(hotelObj).when(hotelRepository).findByHotelCode(hotelRequestDTO.getHotelCode());
-		lenient().doReturn(hotelObj).when(hotelRepository).save(Mockito.any(Hotel.class));
-		HotelResponseDTO updatedHotel = hotelService.updateHotel(1L, hotelRequestDTO);
+		lenient().doReturn(Optional.of(hotel)).when(hotelRepository).findById(1L);
+		lenient().doReturn(hotel).when(hotelRepository).save(Mockito.any(Hotel.class));
+		HotelDTO updatedHotel = hotelService.update(hotelDTO);
 
-		assertEquals(hotelRequestDTO.getAddress(), updatedHotel.getAddress());
-		assertEquals(hotelRequestDTO.getContact(), updatedHotel.getContact());
-		assertEquals(hotelRequestDTO.getHotelCode(), updatedHotel.getHotelCode());
+		assertEquals(hotelDTO.getAddress(), updatedHotel.getAddress());
+		assertEquals(hotelDTO.getContact(), updatedHotel.getContact());
 		assertNotNull(updatedHotel.getId());
 	}
 
 	@Test
 	void test3GetAllHotels() {
-		List<HotelResponseDTO> hotelResponseDTO = new ArrayList<>();
-		hotelResponseDTO.add(hotelResponseDTOObj());
+		List<HotelDTO> hotelResponseDTO = new ArrayList<>();
+		hotelResponseDTO.add(hotelDTOObj());
 
 		List<Hotel> hotelObj = new ArrayList<>();
 		hotelObj.add(hotelObj());
 		lenient().doReturn(hotelObj).when(hotelRepository).findAll();
-		List<HotelResponseDTO> createdHotel = hotelService.getAllHotels();
+		List<HotelDTO> createdHotel = hotelService.getAll();
 
 		assertNotNull(createdHotel.get(0).getAddress());
 		assertNotNull(createdHotel.get(0).getContact());
-		assertNotNull(createdHotel.get(0).getHotelCode());
 		assertNotNull(createdHotel.get(0).getId());
 	}
 }

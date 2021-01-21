@@ -2,17 +2,19 @@ package com.myhotel.service;
 
 import java.util.List;
 
-import com.myhotel.dto.request.GuestRequestDTO;
-import com.myhotel.dto.response.GuestResponseDTO;
+import com.myhotel.domain.Guest;
+import com.myhotel.dto.GuestDTO;
 
 public interface GuestService {
 
-	GuestResponseDTO createGuest(GuestRequestDTO guestDTO);
+	GuestDTO create(GuestDTO guestDTO);
 
-	List<GuestResponseDTO> getAllGuests();
+	List<GuestDTO> getAll();
 
-	GuestResponseDTO updateGuest(Long guestCode, GuestRequestDTO guestRequestDTO);
+	GuestDTO update(GuestDTO guestRequestDTO);
 
-	GuestResponseDTO getGuest(Long guestCode);
+	GuestDTO get(Long guestId);
+
+	Guest getGuestById(Long guestId);
 
 }

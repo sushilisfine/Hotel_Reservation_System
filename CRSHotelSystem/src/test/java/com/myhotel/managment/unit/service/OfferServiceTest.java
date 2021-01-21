@@ -1,9 +1,8 @@
 package com.myhotel.managment.unit.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.lenient;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,10 +13,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.myhotel.managment.domain.Category;
 import com.myhotel.managment.domain.Hotel;
 import com.myhotel.managment.domain.Offer;
-import com.myhotel.managment.dto.request.OfferRequestDTO;
-import com.myhotel.managment.dto.response.OfferResponseDTO;
+import com.myhotel.managment.dto.OfferDTO;
 import com.myhotel.managment.repository.HotelRepository;
 import com.myhotel.managment.repository.OfferRepository;
 import com.myhotel.managment.service.impl.OfferServiceImpl;
@@ -36,68 +35,55 @@ class OfferServiceTest {
 	@Mock
 	private HotelRepository hotelRepository;
 
-	private OfferRequestDTO offerReqObj() {
-		OfferRequestDTO offer = new OfferRequestDTO();
-		offer.setOfferCode(1);
+	private OfferDTO offerDtoObj() {
+		OfferDTO offer = new OfferDTO();
 		offer.setValue(1000.00);
+		offer.setCategoryId(1L);
+		offer.setHotelId(1L);
+		offer.setId(1L);
 		return offer;
 	}
 
 	private Offer offerObj() {
 		Offer offer = new Offer();
-		offer.setId(1);
-		offer.setOfferCode(1);
+		offer.setId(1L);
+		offer.setCategory(Category.builder().id(1L).build());
+		offer.setHotel(Hotel.builder().id(1L).build());
 		offer.setValue(1000.00);
 		return offer;
 	}
 
-	private Hotel hotelObj() {
-		Hotel hotel = new Hotel();
-		hotel.setAddress("Nagpur");
-		hotel.setContact(9999999999L);
-		hotel.setHotelCode(1L);
-		return hotel;
-	}
-
 	@Test
 	void test1AddOffer() {
-		OfferRequestDTO offerRequestDTO = offerReqObj();
+		OfferDTO offerDTO = offerDtoObj();
 		Offer offer = offerObj();
 
-		doReturn(null).when(offerRepository).findByOfferCode(offerRequestDTO.getOfferCode());
 		doReturn(offer).when(offerRepository).save(Mockito.any(Offer.class));
 
-		OfferResponseDTO createdOffer = offerService.addOffer(1L, offerRequestDTO);
+		OfferDTO createdOffer = offerService.add(offerDTO);
 
-		assertEquals(createdOffer.getValue(), offerRequestDTO.getValue());
-		assertEquals(createdOffer.getOfferCode(), offerRequestDTO.getOfferCode());
+		assertEquals(createdOffer.getValue(), offerDTO.getValue());
 	}
 
 	@Test
 	void test2AddOffer() {
-		OfferRequestDTO offerRequestDTO = offerReqObj();
+		OfferDTO offerDTO = offerDtoObj();
 		Offer offer = offerObj();
 
-		doReturn(offer).when(offerRepository).findByOfferCode(offerRequestDTO.getOfferCode());
-		lenient().doReturn(offer).when(offerRepository).save(Mockito.any(Offer.class));
+		doReturn(offer).when(offerRepository).save(Mockito.any(Offer.class));
 
-		OfferResponseDTO createdOffer = offerService.addOffer(1L, offerRequestDTO);
+		OfferDTO createdOffer = offerService.add(offerDTO);
 
-		assertNull(createdOffer);
+		assertNotNull(createdOffer);
 	}
 
 	@Test
 	void test3UpdateOffer() {
-		OfferRequestDTO offerRequestDTO = offerReqObj();
-		Offer offer = offerObj();
-		Hotel hotel = hotelObj();
-		doReturn(hotel).when(hotelRepository).findByHotelCode(1L);
-		lenient().doReturn(offer).when(offerRepository).findByOfferCodeAndHotel(1, hotel);
+		OfferDTO offerDTO = offerDtoObj();
 
-		OfferResponseDTO updatedOffer = offerService.updateOffer(1L, 1, offerRequestDTO);
+		OfferDTO updatedOffer = offerService.update(offerDTO);
 
-		assertEquals(updatedOffer.getValue(), offerRequestDTO.getValue());
-		assertEquals(updatedOffer.getOfferCode(), offerRequestDTO.getOfferCode());
+		assertEquals(updatedOffer.getValue(), offerDTO.getValue());
 	}
 
 }

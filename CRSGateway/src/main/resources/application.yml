@@ -1,0 +1,19 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      routes:
+      - id: hotelService
+        uri: http://localhost:8001/
+        predicates:
+        - Path=/api/v1/hotels/**
+      - id: guestService
+        uri: http://localhost:8002/
+        predicates:
+        - Path=/api/v1/guests/**
+      - id: reservationService
+        uri: http://localhost:8003/
+        predicates:
+        - Path=/api/v1/reservations/**

@@ -6,30 +6,25 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
-@Setter
-@Getter
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "Hotel", indexes = { @Index(name = "hotelIdx", columnList = "hotelCode", unique = true) })
+@Table(name = "Hotel")
 public class Hotel {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
-	private Long hotelCode;
 
 	private String address;
 
@@ -40,5 +35,8 @@ public class Hotel {
 
 	@OneToMany(mappedBy = "hotel")
 	private List<Room> room;
+
+	@OneToMany(mappedBy = "hotel")
+	private List<Category> category;
 
 }

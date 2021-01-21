@@ -1,24 +1,19 @@
 package com.myhotel.managment.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.myhotel.managment.domain.Category;
 import com.myhotel.managment.domain.Hotel;
 import com.myhotel.managment.domain.Offer;
-import com.myhotel.managment.dto.response.OfferResponseDTO;
 
 @Repository
-public interface OfferRepository extends JpaRepository<Offer, Integer> {
+public interface OfferRepository extends JpaRepository<Offer, Long> {
 
-	Offer findByOfferCodeAndHotel(Integer offerCode, Hotel hotel);
+	Optional<List<Offer>> findByHotelAndCategory(Hotel hotel, Category category);
 
-	List<Offer> findAllByHotel(Hotel hotel);
-
-	Offer findByOfferCode(Integer offerCode);
-
-	void findDeleteByHotel(Hotel hotel);
-
-	OfferResponseDTO findByHotel(Hotel hotel);
+	Optional<Offer> findByIdAndHotelAndCategory(Long offerId, Hotel hotel, Category category);
 }

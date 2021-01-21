@@ -2,15 +2,15 @@ package com.myhotel.managment.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.myhotel.managment.domain.Category;
 import com.myhotel.managment.domain.Hotel;
 import com.myhotel.managment.domain.Offer;
-import com.myhotel.managment.dto.request.OfferRequestDTO;
-import com.myhotel.managment.dto.response.OfferResponseDTO;
+import com.myhotel.managment.dto.OfferDTO;
+import com.myhotel.managment.repository.CategoryRepository;
 import com.myhotel.managment.repository.HotelRepository;
 import com.myhotel.managment.repository.OfferRepository;
 import com.myhotel.managment.service.OfferService;
@@ -18,90 +18,83 @@ import com.myhotel.managment.service.OfferService;
 @Service
 public class OfferServiceImpl implements OfferService {
 
-	Logger logger = LoggerFactory.getLogger(OfferServiceImpl.class);
-
 	private OfferRepository offerRepository;
 	private HotelRepository hotelRepository;
+	private CategoryRepository categoryRepository;
 
-	public OfferServiceImpl(OfferRepository offerRepository, HotelRepository hotelRepository) {
+	public OfferServiceImpl(OfferRepository offerRepository, HotelRepository hotelRepository,
+			CategoryRepository categoryRepository) {
 		this.offerRepository = offerRepository;
 		this.hotelRepository = hotelRepository;
+		this.categoryRepository = categoryRepository;
 	}
 
 	@Override
-	public OfferResponseDTO addOffer(Long hotelCode, OfferRequestDTO offerDTO) {
-
-		Offer offerDb = offerRepository.findByOfferCode(offerDTO.getOfferCode());
-
-		if (offerDb != null) {
-
-			logger.error("Offer with Offer Code : {} , already exists.", offerDTO.getOfferCode());
-			return null;
-
-		}
-
-		Hotel hotel = getHotelFromHotelCode(hotelCode);
+	public OfferDTO add(OfferDTO offerDTO) {
 
 		Offer offer = converteDTOToEntity(offerDTO);
-		offer.setHotel(hotel);
 		return converteEntityToDTO(offerRepository.save(offer));
 
 	}
 
 	@Override
-	public OfferResponseDTO updateOffer(Long hotelCode, Integer offerCode, OfferRequestDTO offerRequestDTO) {
-
-		Hotel hotelDb = hotelRepository.findByHotelCode(hotelCode);
-
-		Offer offer = offerRepository.findByOfferCodeAndHotel(offerCode, hotelDb);
-
-		return updateOfferFromDTO(offer, offerRequestDTO);
-	}
-
-	private OfferResponseDTO updateOfferFromDTO(Offer offer, OfferRequestDTO offerRequestDTO) {
-
-		offer.setOfferCode(offerRequestDTO.getOfferCode());
-		offer.setValue(offerRequestDTO.getValue());
+	public OfferDTO update(OfferDTO offerDTO) {
+		Offer offer = converteDTOToEntity(offerDTO);
+		offerRepository.save(offer);
 		return converteEntityToDTO(offer);
-
 	}
 
 	@Override
-	public List<OfferResponseDTO> getAllOffers(Long hotelCode) {
-		Hotel hotel = getHotelFromHotelCode(hotelCode);
-		List<Offer> offers = offerRepository.findAllByHotel(hotel);
-		List<OfferResponseDTO> offerResponseDTO = new ArrayList<>();
-
-		offers.forEach(offer -> {
-			offerResponseDTO.add(converteEntityToDTO(offer));
-
-		});
-		return offerResponseDTO;
+	public Long delete(Long offerId) {
+		offerRepository.deleteById(offerId);
+		return offerId;
 	}
 
 	@Override
-	public OfferResponseDTO deleteOffer(Long hotelCode) {
-
-		Hotel hotel = getHotelFromHotelCode(hotelCode);
-		OfferResponseDTO offerResponseDTO = offerRepository.findByHotel(hotel);
-		offerRepository.findDeleteByHotel(hotel);
-		return offerResponseDTO;
+	public List<OfferDTO> getAll(Long hotelId, Long categoryId) {
+		List<Offer> offer = getOffers(hotelId, categoryId);
+		return converteEntityToDTO(offer);
 	}
 
-	private Offer converteDTOToEntity(OfferRequestDTO offerDTO) {
+	@Override
+	public Offer getOffer(Long offerId) {
+		Optional<Offer> offer = offerRepository.findById(offerId);
+		return offer.isPresent() ? offer.get() : new Offer();
+	}
 
-		return Offer.builder().offerCode(offerDTO.getOfferCode()).value(offerDTO.getValue()).build();
+	private Offer converteDTOToEntity(OfferDTO offerDTO) {
+		Hotel hotel = Hotel.builder().id(offerDTO.getHotelId()).build();
+		Category category = Category.builder().hotel(hotel).id(offerDTO.getCategoryId()).build();
+		return Offer.builder().id(offerDTO.getId()).value(offerDTO.getValue()).hotel(hotel).category(category).build();
+	}
+
+	private OfferDTO converteEntityToDTO(Offer offer) {
+		return OfferDTO.builder().id(offer.getId()).value(offer.getValue()).categoryId(offer.getCategory().getId())
+				.hotelId(offer.getHotel().getId()).build();
+	}
+
+	private List<OfferDTO> converteEntityToDTO(List<Offer> offers) {
+		List<OfferDTO> offerDTO = new ArrayList<>();
+		offers.forEach(offer -> offerDTO.add(converteEntityToDTO(offer)));
+		return offerDTO;
+	}
+
+	public Hotel getHotel(Long hotelId) {
+		Optional<Hotel> hotel = hotelRepository.findById(hotelId);
+		return hotel.isPresent() ? hotel.get() : new Hotel();
 
 	}
 
-	private OfferResponseDTO converteEntityToDTO(Offer offer) {
-
-		return OfferResponseDTO.builder().offerCode(offer.getOfferCode()).value(offer.getValue()).build();
-
+	public List<Offer> getOffers(Long hotelId, Long categoryId) {
+		Hotel hotel = Hotel.builder().id(hotelId).build();
+		Category category = Category.builder().hotel(hotel).id(categoryId).build();
+		Optional<List<Offer>> offer = offerRepository.findByHotelAndCategory(hotel, category);
+		return offer.isPresent() ? offer.get() : new ArrayList<>();
 	}
 
-	private Hotel getHotelFromHotelCode(Long hotelCode) {
-		return hotelRepository.findByHotelCode(hotelCode);
+	public Category getCategory(Long categoryId) {
+		Optional<Category> category = categoryRepository.findById(categoryId);
+		return category.isPresent() ? category.get() : new Category();
 	}
 
 }

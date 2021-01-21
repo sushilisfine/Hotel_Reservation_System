@@ -2,17 +2,25 @@ package com.myhotel.managment.service;
 
 import java.util.List;
 
-import com.myhotel.managment.dto.request.OfferRequestDTO;
-import com.myhotel.managment.dto.response.OfferResponseDTO;
+import com.myhotel.managment.domain.Category;
+import com.myhotel.managment.domain.Hotel;
+import com.myhotel.managment.domain.Offer;
+import com.myhotel.managment.dto.OfferDTO;
 
 public interface OfferService {
 
-	OfferResponseDTO addOffer(Long hotelCode, OfferRequestDTO offer);
+	OfferDTO add(OfferDTO offer);
 
-	OfferResponseDTO updateOffer(Long hotelCode, Integer offerCode, OfferRequestDTO offer);
+	OfferDTO update(OfferDTO offer);
 
-	List<OfferResponseDTO> getAllOffers(Long hotelCode);
+	Long delete(Long offerId);
 
-	OfferResponseDTO deleteOffer(Long hotelCode);
+	List<OfferDTO> getAll(Long hotelId, Long categoryId);
+
+	Hotel getHotel(Long hotelId);
+
+	Category getCategory(Long categoryId);
+
+	Offer getOffer(Long offerId);
 
 }

@@ -2,7 +2,7 @@ package com.myhotel.unit.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -13,91 +13,108 @@ import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.myhotel.dto.request.GuestRequestDTO;
-import com.myhotel.dto.response.GuestResponseDTO;
+import com.myhotel.controller.impl.GuestControllerImpl;
+import com.myhotel.domain.Guest;
+import com.myhotel.dto.GuestDTO;
 import com.myhotel.service.GuestService;
 
 class GuestControllerTest extends AbstractTest {
 
-	@MockBean
+	private MockMvc mockMvc;
+
+	@Mock
 	private GuestService guestService;
 
-	private GuestRequestDTO guestRequestObj() {
-		GuestRequestDTO guest = new GuestRequestDTO();
+	@InjectMocks
+	private GuestControllerImpl guestController;
+
+	@BeforeEach
+	public void setup() {
+
+		MockitoAnnotations.openMocks(this);
+		this.mockMvc = MockMvcBuilders.standaloneSetup(guestController).build();
+	}
+
+	private GuestDTO guestDTOObj() {
+		GuestDTO guest = new GuestDTO();
+		guest.setId(1L);
 		guest.setEmail("test@test.com");
 		guest.setName("test");
 		guest.setContact(9999999999L);
-		guest.setGuestCode(1L);
 		return guest;
 	}
 
-	private GuestResponseDTO guestResponseObj() {
-		GuestResponseDTO guest = new GuestResponseDTO();
+	private Guest guestObj() {
+		Guest guest = new Guest();
+		guest.setId(1L);
 		guest.setEmail("test@test.com");
 		guest.setName("test");
 		guest.setContact(9999999999L);
-		guest.setGuestCode(1L);
 		return guest;
 	}
 
 	@Test
 	void test1SaveGuest() throws Exception {
 
-		GuestRequestDTO guestReqObj = guestRequestObj();
-		GuestResponseDTO guestResObj = guestResponseObj();
+		GuestDTO guestDTOObj = guestDTOObj();
 
-		doReturn(guestResObj).when(guestService.createGuest(guestReqObj));
+		lenient().doReturn(guestDTOObj).when(guestService).create(guestDTOObj);
 
-		mvc.perform(post("/api/v1/guests").contentType(MediaType.APPLICATION_JSON).content(asJsonString(guestReqObj))
-				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
+		mockMvc.perform(post("/api/v1/guests").contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(guestDTOObj)).accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 
-		assertEquals(guestReqObj.getGuestCode(), guestResObj.getGuestCode());
+		assertEquals(guestDTOObj.getContact(), guestDTOObj.getContact());
 
 	}
 
 	@Test
 	void test1UpdateGuest() throws Exception {
 
-		GuestRequestDTO guestReqObj = guestRequestObj();
-		GuestResponseDTO guestResObj = guestResponseObj();
+		GuestDTO guestDTOObj = guestDTOObj();
 
-		doReturn(guestResObj).when(guestService.updateGuest(1L, guestReqObj));
+		lenient().doReturn(guestObj()).when(guestService).getGuestById(1L);
+		lenient().doReturn(guestDTOObj).when(guestService).update(guestDTOObj);
 
-		mvc.perform(put("/api/v1/guests/1").contentType(MediaType.APPLICATION_JSON).content(asJsonString(guestReqObj))
-				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+		mockMvc.perform(put("/api/v1/guests/1").contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(guestDTOObj)).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
-		assertEquals(guestReqObj.getGuestCode(), guestResObj.getGuestCode());
+		assertEquals(guestDTOObj.getContact(), guestDTOObj.getContact());
 
 	}
 
 	@Test
 	void test1GetAllGuests() throws Exception {
 
-		List<GuestResponseDTO> guestResObj = new ArrayList<>();
-		guestResObj.add(guestResponseObj());
+		List<GuestDTO> guestResObj = new ArrayList<>();
+		guestResObj.add(guestDTOObj());
 
-		doReturn(guestResObj).when(guestService.getAllGuests());
+		lenient().doReturn(guestResObj).when(guestService).getAll();
 
-		mvc.perform(get("/api/v1/guests").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+		mockMvc.perform(get("/api/v1/guests").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
 		assertNotNull(guestResObj);
 
 	}
 
 	@Test
-	void test1GetGuestByGuestCode() throws Exception {
+	void test1GetGuestByguestId() throws Exception {
 
-		GuestResponseDTO guestResObj = guestResponseObj();
+		GuestDTO guestDTOObj = guestDTOObj();
 
-		doReturn(guestResObj).when(guestService.getGuest(1L));
+		lenient().doReturn(guestDTOObj).when(guestService).get(1L);
 
-		mvc.perform(get("/api/v1/guests/1").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+		mockMvc.perform(get("/api/v1/guests/1").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
-		assertNotNull(guestResObj);
-		assertEquals(1, guestResObj.getId());
+		assertNotNull(guestDTOObj);
+		assertEquals(1, guestDTOObj.getId());
 
 	}
 

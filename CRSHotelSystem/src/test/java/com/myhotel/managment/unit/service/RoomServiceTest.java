@@ -1,13 +1,14 @@
 package com.myhotel.managment.unit.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,10 +19,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.myhotel.managment.domain.Category;
 import com.myhotel.managment.domain.Hotel;
 import com.myhotel.managment.domain.Room;
-import com.myhotel.managment.dto.request.RoomRequestDTO;
-import com.myhotel.managment.dto.response.RoomResponseDTO;
+import com.myhotel.managment.dto.RoomDTO;
+import com.myhotel.managment.repository.CategoryRepository;
 import com.myhotel.managment.repository.HotelRepository;
 import com.myhotel.managment.repository.RoomRepository;
 import com.myhotel.managment.service.impl.RoomServiceImpl;
@@ -40,89 +42,162 @@ class RoomServiceTest {
 	@Mock
 	private HotelRepository hotelRepository;
 
-	private RoomRequestDTO roomReqObj() {
-		RoomRequestDTO room = new RoomRequestDTO();
-		room.setRoomCode(1);
-		room.setRoomCategory("Single");
+	@Mock
+	private CategoryRepository categoryRepository;
 
+	private RoomDTO roomDtoObj() {
+		RoomDTO room = new RoomDTO();
+		room.setCategoryId(1L);
+		room.setHotelId(1L);
+		room.setId(1L);
 		List<LocalDate> bookingDates = new ArrayList<>();
 
 		bookingDates.add(LocalDate.of(2021, 2, 12));
 		bookingDates.add(LocalDate.of(2021, 2, 13));
 		bookingDates.add(LocalDate.of(2021, 2, 14));
+		bookingDates.add(LocalDate.of(2021, 2, 3));
 
 		room.setBookedDates(bookingDates);
-		room.setCharges(200.00);
 		return room;
 	}
 
 	private Room roomObj() {
 		Room room = new Room();
-		room.setId(1);
-		room.setRoomCode(1);
-		room.setRoomCategory("Single");
+		room.setId(1L);
+		room.setCategory(Category.builder().id(1L).build());
+		room.setHotel(Hotel.builder().id(1L).build());
+
 		List<LocalDate> bookingDates = new ArrayList<>();
 
 		bookingDates.add(LocalDate.of(2021, 2, 12));
 		bookingDates.add(LocalDate.of(2021, 2, 13));
 		bookingDates.add(LocalDate.of(2021, 2, 14));
+		bookingDates.add(LocalDate.of(2021, 2, 3));
 
 		room.setBookedDates(bookingDates);
-		room.setCharges(200.00);
 		return room;
 	}
 
-	private Hotel hotelObj() {
-		Hotel hotel = new Hotel();
-		hotel.setAddress("Nagpur");
-		hotel.setContact(9999999999L);
-		hotel.setHotelCode(1L);
-		return hotel;
+	private Room roomObj2() {
+		Room room = new Room();
+		room.setId(2L);
+		room.setCategory(Category.builder().id(1L).build());
+		room.setHotel(Hotel.builder().id(1L).build());
+
+		List<LocalDate> bookingDates = new ArrayList<>();
+
+		bookingDates.add(LocalDate.of(2021, 2, 1));
+		bookingDates.add(LocalDate.of(2021, 2, 3));
+		bookingDates.add(LocalDate.of(2021, 2, 16));
+
+		room.setBookedDates(bookingDates);
+		return room;
 	}
 
 	@Test
 	void test1AddRoom() {
-		RoomRequestDTO roomRequestDTO = roomReqObj();
+		RoomDTO roomCreateRequestDTO = roomDtoObj();
 		Room room = roomObj();
 
-		doReturn(null).when(roomRepository).findByRoomCode(roomRequestDTO.getRoomCode());
 		doReturn(room).when(roomRepository).save(Mockito.any(Room.class));
 
-		RoomResponseDTO createdRoom = roomService.addRoom(1L, roomRequestDTO);
+		RoomDTO createdRoom = roomService.add(roomCreateRequestDTO);
 
-		assertEquals(createdRoom.getCharges(), roomRequestDTO.getCharges());
-		assertEquals(createdRoom.getBookedDates(), roomRequestDTO.getBookedDates());
-		assertEquals(createdRoom.getRoomCategory(), roomRequestDTO.getRoomCategory());
-		assertEquals(createdRoom.getRoomCode(), roomRequestDTO.getRoomCode());
+		assertNotNull(createdRoom);
 	}
 
 	@Test
 	void test2AddRoom() {
-		RoomRequestDTO roomRequestDTO = roomReqObj();
+		RoomDTO roomCreateRequestDTO = roomDtoObj();
 		Room room = roomObj();
 
-		doReturn(room).when(roomRepository).findByRoomCode(roomRequestDTO.getRoomCode());
 		lenient().doReturn(room).when(roomRepository).save(Mockito.any(Room.class));
 
-		RoomResponseDTO createdRoom = roomService.addRoom(1L, roomRequestDTO);
+		RoomDTO createdRoom = roomService.add(roomCreateRequestDTO);
 
-		assertNull(createdRoom);
+		assertNotNull(createdRoom);
 	}
 
 	@Test
 	void test3UpdateRoom() {
-		RoomRequestDTO roomRequestDTO = roomReqObj();
+		RoomDTO roomDTO = roomDtoObj();
 		Room room = roomObj();
-		Hotel hotel = hotelObj();
-		doReturn(hotel).when(hotelRepository).findByHotelCode(1L);
-		lenient().doReturn(room).when(roomRepository).findByRoomCodeAndHotel(1, hotel);
 
-		RoomResponseDTO updatedRoom = roomService.updateRoom(1L, 1, roomRequestDTO);
+		room.getBookedDates().addAll(roomDTO.getBookedDates());
 
-		assertEquals(updatedRoom.getCharges(), roomRequestDTO.getCharges());
-		assertEquals(updatedRoom.getBookedDates(), roomRequestDTO.getBookedDates());
-		assertEquals(updatedRoom.getRoomCategory(), roomRequestDTO.getRoomCategory());
-		assertEquals(updatedRoom.getRoomCode(), roomRequestDTO.getRoomCode());
+		lenient().doReturn(Optional.of(room)).when(roomRepository).findById(1L);
+
+		doReturn(room).when(roomRepository).save(Mockito.any(Room.class));
+
+		RoomDTO updatedRoom = roomService.update(roomDTO);
+
+		assertEquals(room.getBookedDates(), updatedRoom.getBookedDates());
+	}
+
+	@Test
+	void test3GetAllRooms() {
+		List<Room> roomResDTO = new ArrayList<>();
+		roomResDTO.add(roomObj());
+
+		List<RoomDTO> roomResponse = roomService.getAll(1L);
+
+		assertNotNull(roomResponse);
+
+	}
+
+	@Test
+	void testGetAllRoomsWithParams1() {
+
+		List<Room> roomObj = new ArrayList<>();
+		roomObj.add(roomObj());
+		roomObj.add(roomObj2());
+
+		lenient().doReturn(Optional.of(roomObj)).when(roomRepository)
+				.findAllByHotelAndCategory(Mockito.any(Hotel.class), Mockito.any(Category.class));
+
+		List<RoomDTO> roomResponse = roomService.getByParams(1L, LocalDate.parse("2021-02-04"),
+				LocalDate.parse("2021-02-11"), 1L);
+
+		assertNotNull(roomResponse);
+		assertEquals(2, roomResponse.size());
+
+	}
+
+	@Test
+	void testGetAllRoomsWithParams2() {
+
+		List<Room> roomObj = new ArrayList<>();
+		roomObj.add(roomObj());
+		roomObj.add(roomObj2());
+
+		lenient().doReturn(Optional.of(roomObj)).when(roomRepository)
+				.findAllByHotelAndCategory(Mockito.any(Hotel.class), Mockito.any(Category.class));
+
+		List<RoomDTO> roomResponse = roomService.getByParams(1L, LocalDate.parse("2021-02-01"),
+				LocalDate.parse("2021-02-05"), 1L);
+
+		assertNotNull(roomResponse);
+		assertEquals(0, roomResponse.size());
+
+	}
+
+	@Test
+	void testGetAllRoomsWithParams3() {
+
+		List<Room> roomObj = new ArrayList<>();
+		roomObj.add(roomObj());
+		roomObj.add(roomObj2());
+
+		lenient().doReturn(Optional.of(roomObj)).when(roomRepository)
+				.findAllByHotelAndCategory(Mockito.any(Hotel.class), Mockito.any(Category.class));
+
+		List<RoomDTO> roomResponse = roomService.getByParams(1l, LocalDate.parse("2021-02-12"),
+				LocalDate.parse("2021-02-14"), 1L);
+
+		assertNotNull(roomResponse);
+		assertEquals(1, roomResponse.size());
+		assertEquals(2, roomResponse.get(0).getId());
+
 	}
 
 }
